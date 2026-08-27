@@ -35,7 +35,11 @@ def assign_complaint(complaint_id):
     if not complaint.category or not complaint.category.department:
         return None, "Complaint category or department is missing"
 
-    department = complaint.category.department
+    from .workflows import WorkflowEngine
+    department = WorkflowEngine.evaluate_routing(complaint)
+    
+    if not department:
+        return None, "No suitable department found via routing rules"
 
     # Get active statuses that represent 'workload'
     active_statuses = [

@@ -56,7 +56,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 _buildActionCard(context, 'Report Problem', Icons.add_circle, Colors.blue, onTap: () => context.push('/report')),
                 _buildActionCard(context, 'Nearby Problems', Icons.location_on, Colors.red, onTap: () => context.push('/citizen_map')),
-                _buildActionCard(context, 'My Complaints', Icons.list_alt, Colors.purple, onTap: () {}),
+                _buildActionCard(context, 'Civic Engagement', Icons.emoji_events, Colors.amber, onTap: () => context.push('/gamification')),
                 _buildActionCard(context, 'Notifications', Icons.notifications, Colors.orange, onTap: () => context.push('/notifications')),
               ],
             ),

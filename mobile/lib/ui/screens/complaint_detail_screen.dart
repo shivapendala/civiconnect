@@ -16,6 +16,8 @@ class ComplaintDetailScreen extends StatelessWidget {
           children: [
             _buildStatusHeader(context),
             const SizedBox(height: 24),
+            _buildAiInsightsSection(context),
+            const SizedBox(height: 24),
             _buildDetailsSection(context),
             const SizedBox(height: 24),
             _buildTimelineSection(context),
@@ -45,6 +47,35 @@ class ComplaintDetailScreen extends StatelessWidget {
               ],
             ),
             Icon(Icons.autorenew, color: Colors.blue, size: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiInsightsSection(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.purple.shade200, width: 1)),
+      color: Colors.purple.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.auto_awesome, color: Colors.purple.shade700),
+                const SizedBox(width: 8),
+                Text('AI Insights', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.purple.shade900)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text('Vision Analysis:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('• Detected: Pothole, Asphalt, Water\n• Severity: High\n• Confidence: 89%'),
+            const SizedBox(height: 12),
+            const Text('Resolution Precedents (RAG):', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Found 3 similar past complaints. Standard procedure: Dispatch maintenance crew for inspection. Avg resolution: 4 days.'),
           ],
         ),
       ),

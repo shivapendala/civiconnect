@@ -38,6 +38,7 @@ class Complaint(AbstractBaseModel):
     priority = models.CharField(max_length=20, choices=ComplaintPriority.choices, default=ComplaintPriority.MEDIUM)
     status = models.CharField(max_length=20, choices=ComplaintStatus.choices, default=ComplaintStatus.SUBMITTED)
     ai_confidence_score = models.FloatField(default=0.0)
+    ai_insights = models.JSONField(null=True, blank=True, help_text="AI generated insights, similar complaints, and analysis")
     
     def __str__(self):
         return self.title

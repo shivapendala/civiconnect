@@ -15,6 +15,7 @@ import '../ui/screens/admin_map_screen.dart';
 import '../ui/screens/notifications_screen.dart';
 import '../ui/screens/notification_preferences_screen.dart';
 import '../ui/screens/admin_analytics_screen.dart';
+import '../ui/screens/gamification_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -86,6 +87,11 @@ final GoRouter appRouter = GoRouter(
       path: '/admin/analytics',
       name: 'admin_analytics',
       builder: (context, state) => const AdminAnalyticsScreen(),
+    ),
+    GoRoute(
+      path: '/gamification',
+      name: 'gamification',
+      builder: (context, state) => const GamificationScreen(),
     ),
   ],
 );

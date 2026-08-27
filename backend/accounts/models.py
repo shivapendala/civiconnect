@@ -115,3 +115,38 @@ class AuditLog(AbstractBaseModel):
     def __str__(self):
         return f"[{self.created_at}] {self.user.email if self.user else 'SYSTEM'} {self.action} on {self.entity_type} {self.entity_id}"
 
+# --- GAMIFICATION MODELS ---
+
+class CivicPoints(AbstractBaseModel):
+    citizen = models.OneToOneField(CitizenProfile, on_delete=models.CASCADE, related_name='civic_points')
+    total_points = models.IntegerField(default=0)
+    level = models.IntegerField(default=1)
+    
+    def add_points(self, amount):
+        self.total_points += amount
+        # Simple level up logic
+        self.level = (self.total_points // 100) + 1
+        self.save()
+
+    def __str__(self):
+        return f"{self.citizen.user.email} - {self.total_points} pts (Lvl {self.level})"
+
+class Badge(AbstractBaseModel):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    icon_url = models.URLField(blank=True)
+    points_required = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.name
+
+class CitizenBadge(AbstractBaseModel):
+    citizen = models.ForeignKey(CitizenProfile, on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    awarded_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('citizen', 'badge')
+        
+    def __str__(self):
+        return f"{self.citizen.user.email} earned {self.badge.name}"

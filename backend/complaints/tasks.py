@@ -68,3 +68,15 @@ def check_sla_violations():
 
     logger.info(f"SLA check completed. {escalated_count} complaints escalated.")
     return f"Escalated {escalated_count} complaints"
+
+@shared_task
+def run_vision_analysis_task(complaint_id):
+    from .ai_services import analyze_complaint_image
+    success = analyze_complaint_image(complaint_id)
+    return success
+
+@shared_task
+def run_rag_analysis_task(complaint_id):
+    from .ai_services import find_similar_complaints_rag
+    success = find_similar_complaints_rag(complaint_id)
+    return success

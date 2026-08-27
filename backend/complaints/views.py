@@ -27,7 +27,14 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         user = self.request.user
         # Must be a citizen to create a complaint directly through this endpoint
         if hasattr(user, 'citizen_profile'):
-            complaint = serializer.save(citizen=user.citizen_profile, municipality=user.citizen_profile.municipality)
+            citizen = self.request.user.citizen_profile
+            complaint = serializer.save(citizen=citizen, municipality=citizen.municipality)
+            
+            # Dispatch AI Background Tasks
+            from .tasks import run_vision_analysis_task, run_rag_analysis_task
+            run_vision_analysis_task.delay(complaint.id)
+            run_rag_analysis_task.delay(complaint.id)
+            
             log_audit_action(user.id, "Created Complaint", "Complaint", complaint.id, new_value=complaint.title, ip_address=self.request.META.get('REMOTE_ADDR'))
             # Auto-assign
             assign_complaint(complaint.id)

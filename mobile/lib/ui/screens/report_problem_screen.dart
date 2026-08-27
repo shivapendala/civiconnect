@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../services/offline_sync_manager.dart';
 
 class ReportProblemScreen extends StatefulWidget {
   const ReportProblemScreen({super.key});
@@ -37,18 +38,33 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
     }
   }
 
-  void _submitComplaint() {
+  void _submitComplaint() async {
     // Generate unique ID
     final year = DateTime.now().year;
     final randomId = Random().nextInt(999999).toString().padLeft(6, '0');
     final complaintId = 'CC-$year-$randomId';
+
+    // Queue for offline sync
+    final data = {
+      'id': complaintId,
+      'category': _selectedCategory,
+      'description': _description,
+      'priority': _priority,
+      'has_gps': _hasGps,
+    };
+    
+    await OfflineSyncManager().queueOfflineAction(
+      'complaints/',
+      'POST',
+      data,
+    );
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Complaint Submitted!'),
-        content: Text('Your complaint has been logged.\n\nID: $complaintId'),
+        content: Text('Your complaint has been queued for sync.\n\nID: $complaintId'),
         actions: [
           TextButton(
             onPressed: () {
