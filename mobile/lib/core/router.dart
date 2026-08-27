@@ -10,6 +10,8 @@ import '../ui/screens/complaint_detail_screen.dart';
 import '../ui/screens/admin_dashboard_screen.dart';
 import '../ui/screens/department_management_screen.dart';
 import '../ui/screens/staff_management_screen.dart';
+import '../ui/screens/citizen_map_screen.dart';
+import '../ui/screens/admin_map_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -56,6 +58,16 @@ final GoRouter appRouter = GoRouter(
       path: '/admin/staff',
       name: 'staff',
       builder: (context, state) => const StaffManagementScreen(),
+    ),
+    GoRoute(
+      path: '/citizen_map',
+      name: 'citizen_map',
+      builder: (context, state) => const CitizenMapScreen(),
+    ),
+    GoRoute(
+      path: '/admin/map',
+      name: 'admin_map',
+      builder: (context, state) => const AdminMapScreen(),
     ),
   ],
 );
