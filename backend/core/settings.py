@@ -82,6 +82,41 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ==============================================================================
+# PHASE 20: SECURITY SETTINGS
+# ==============================================================================
+
+# 1. Security Headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# In production (with HTTPS), you would also enable:
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = 31536000
+
+# 2. DRF Rate Limiting (Throttling)
+REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = [
+    'rest_framework.throttling.AnonRateThrottle',
+    'rest_framework.throttling.UserRateThrottle'
+]
+REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+    'anon': '100/day',
+    'user': '1000/day'
+}
+
+# 3. Secret Management Check
+# The project uses .env via decouple. 
+# We explicitly do NOT commit .env, AWS keys, or DB passwords to Git.
+
+
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
