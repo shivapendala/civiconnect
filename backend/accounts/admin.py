@@ -1,48 +1,78 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Tenant, Department, Ward, User, StaffSchedule, AuditLog
+from .models import (
+    Municipality, Department, User, Role, Permission, UserRole,
+    StaffProfile, CitizenProfile, Device, NotificationPreference,
+    Notification, AuditLog, CivicPoints, Badge, CitizenBadge
+)
 
-@admin.register(Tenant)
-class TenantAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "domain", "subscription_tier", "is_active", "created_at")
-    list_filter = ("subscription_tier", "is_active", "country")
-    search_fields = ("name", "code", "domain", "contact_email")
+@admin.register(Municipality)
+class MunicipalityAdmin(admin.ModelAdmin):
+    list_display = ("name", "state", "country", "contact_email", "contact_phone")
+    search_fields = ("name", "state", "country")
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "tenant", "head_of_department", "sla_default_hours", "is_active")
-    list_filter = ("tenant", "is_active")
-    search_fields = ("name", "code")
-
-@admin.register(Ward)
-class WardAdmin(admin.ModelAdmin):
-    list_display = ("ward_number", "name", "tenant", "zone_name", "councillor_name", "population")
-    list_filter = ("tenant", "is_active")
-    search_fields = ("name", "councillor_name", "zone_name")
+    list_display = ("name", "municipality", "manager")
+    list_filter = ("municipality",)
+    search_fields = ("name",)
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ("email", "first_name", "last_name", "role", "tenant", "department", "karma_points", "is_active")
-    list_filter = ("role", "tenant", "department", "is_active", "is_verified")
-    search_fields = ("email", "first_name", "last_name", "phone_number")
+    list_display = ("email", "username", "first_name", "last_name", "is_staff", "is_verified")
+    list_filter = ("is_staff", "is_superuser", "is_active", "is_verified")
+    search_fields = ("email", "username", "first_name", "last_name")
     ordering = ("email",)
-    fieldsets = (
-        (None, {"fields": ("email", "password")}),
-        ("Personal Info", {"fields": ("first_name", "last_name", "phone_number", "avatar", "preferred_language")}),
-        ("Municipal Affiliation", {"fields": ("role", "tenant", "department", "assigned_ward")}),
-        ("Gamification & Stats", {"fields": ("karma_points", "badge_title", "reports_submitted", "reports_resolved")}),
-        ("Permissions & Status", {"fields": ("is_active", "is_staff", "is_superuser", "is_verified", "is_mfa_enabled")}),
-        ("Location", {"fields": ("last_location_lat", "last_location_lng", "last_location_updated")}),
-    )
 
-@admin.register(StaffSchedule)
-class StaffScheduleAdmin(admin.ModelAdmin):
-    list_display = ("user", "shift_date", "start_time", "end_time", "is_on_duty", "emergency_on_call")
-    list_filter = ("shift_date", "is_on_duty", "emergency_on_call")
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ("name", "description")
+
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ("name", "codename")
+
+@admin.register(UserRole)
+class UserRoleAdmin(admin.ModelAdmin):
+    list_display = ("user", "role")
+
+@admin.register(StaffProfile)
+class StaffProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "municipality", "department", "designation")
+    list_filter = ("municipality", "department")
+
+@admin.register(CitizenProfile)
+class CitizenProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "municipality", "address")
+    list_filter = ("municipality",)
+
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ("user", "device_type", "fcm_token")
+
+@admin.register(NotificationPreference)
+class NotificationPreferenceAdmin(admin.ModelAdmin):
+    list_display = ("user", "push_enabled", "email_enabled", "sms_enabled")
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("user", "title", "is_read")
+    list_filter = ("is_read",)
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ("timestamp", "actor", "action", "entity_type", "entity_id", "tenant", "ip_address")
-    list_filter = ("action", "entity_type", "timestamp")
-    search_fields = ("actor__email", "entity_id", "ip_address")
-    readonly_fields = [f.name for f in AuditLog._meta.fields]
+    list_display = ("user", "action", "entity_type", "entity_id", "created_at")
+    list_filter = ("action", "entity_type")
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(CivicPoints)
+class CivicPointsAdmin(admin.ModelAdmin):
+    list_display = ("citizen", "total_points", "level")
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("name", "points_required")
+
+@admin.register(CitizenBadge)
+class CitizenBadgeAdmin(admin.ModelAdmin):
+    list_display = ("citizen", "badge", "awarded_at")

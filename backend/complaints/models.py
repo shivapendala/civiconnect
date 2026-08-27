@@ -10,6 +10,8 @@ class ComplaintCategory(AbstractBaseModel):
     def __str__(self):
         return self.name
 
+Category = ComplaintCategory
+
 class ComplaintPriority(models.TextChoices):
     LOW = 'LOW', 'Low'
     MEDIUM = 'MEDIUM', 'Medium'
