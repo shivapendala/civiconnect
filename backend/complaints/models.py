@@ -17,12 +17,17 @@ class ComplaintPriority(models.TextChoices):
     CRITICAL = 'CRITICAL', 'Critical'
 
 class ComplaintStatus(models.TextChoices):
-    PENDING = 'PENDING', 'Pending'
+    SUBMITTED = 'SUBMITTED', 'Submitted'
+    ACKNOWLEDGED = 'ACKNOWLEDGED', 'Acknowledged'
     ASSIGNED = 'ASSIGNED', 'Assigned'
-    INVESTIGATING = 'INVESTIGATING', 'Investigating'
+    IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+    ON_HOLD = 'ON_HOLD', 'On Hold'
     RESOLVED = 'RESOLVED', 'Resolved'
-    VERIFIED = 'VERIFIED', 'Verified'
+    CITIZEN_VERIFIED = 'CITIZEN_VERIFIED', 'Citizen Verified'
     CLOSED = 'CLOSED', 'Closed'
+    REJECTED = 'REJECTED', 'Rejected'
+    REOPENED = 'REOPENED', 'Reopened'
+    ESCALATED = 'ESCALATED', 'Escalated'
 
 class Complaint(AbstractBaseModel):
     citizen = models.ForeignKey(CitizenProfile, on_delete=models.CASCADE, related_name='complaints')
@@ -30,7 +35,7 @@ class Complaint(AbstractBaseModel):
     title = models.CharField(max_length=255)
     description = models.TextField()
     priority = models.CharField(max_length=20, choices=ComplaintPriority.choices, default=ComplaintPriority.MEDIUM)
-    status = models.CharField(max_length=20, choices=ComplaintStatus.choices, default=ComplaintStatus.PENDING)
+    status = models.CharField(max_length=20, choices=ComplaintStatus.choices, default=ComplaintStatus.SUBMITTED)
     ai_confidence_score = models.FloatField(default=0.0)
     
     def __str__(self):

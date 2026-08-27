@@ -6,6 +6,7 @@ import '../ui/screens/splash_screen.dart';
 import '../ui/screens/login_screen.dart';
 import '../ui/screens/home_screen.dart';
 import '../ui/screens/report_problem_screen.dart';
+import '../ui/screens/complaint_detail_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -29,6 +30,14 @@ final GoRouter appRouter = GoRouter(
       path: '/report',
       name: 'report',
       builder: (context, state) => const ReportProblemScreen(),
+    ),
+    GoRoute(
+      path: '/complaint/:id',
+      name: 'complaint_detail',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return ComplaintDetailScreen(complaintId: id);
+      },
     ),
   ],
 );

@@ -145,7 +145,7 @@ class HomeScreen extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('$status • $distance'),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
+        onTap: () => context.push('/complaint/CC-2026-00001245'),
       ),
     );
   }
