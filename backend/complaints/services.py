@@ -107,3 +107,95 @@ def override_assignment(complaint_id, new_staff_profile_id):
         complaint.save()
 
     return True, f"Manually reassigned to {new_staff.user.email}"
+
+from .models import Resolution, ResolutionEvidence, Feedback
+from accounts.notifications import send_notification
+
+def resolve_complaint(complaint_id, staff_profile_id, summary, file_url=""):
+    """
+    Called by Staff to mark a complaint as RESOLVED.
+    """
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+        staff = StaffProfile.objects.get(id=staff_profile_id)
+    except (Complaint.DoesNotExist, StaffProfile.DoesNotExist):
+        return False, "Complaint or Staff not found"
+
+    # Create Resolution record
+    resolution, created = Resolution.objects.get_or_create(
+        complaint=complaint,
+        defaults={'staff': staff, 'summary': summary}
+    )
+    if not created:
+        resolution.summary = summary
+        resolution.save()
+
+    if file_url:
+        ResolutionEvidence.objects.create(resolution=resolution, file_url=file_url)
+
+    complaint.status = ComplaintStatus.RESOLVED
+    complaint.save()
+
+    # Notify Citizen
+    send_notification(
+        complaint.citizen.user.id,
+        "Complaint Resolved",
+        f"Your complaint {complaint.id} has been marked as resolved. Please verify.",
+        reference_id=str(complaint.id)
+    )
+
+    return True, "Complaint resolved successfully"
+
+def verify_complaint(complaint_id, citizen_id, rating, comments=""):
+    """
+    Called by Citizen to accept the resolution and close the workflow.
+    """
+    try:
+        complaint = Complaint.objects.get(id=complaint_id, citizen_id=citizen_id)
+    except Complaint.DoesNotExist:
+        return False, "Complaint not found or unauthorized"
+
+    if complaint.status != ComplaintStatus.RESOLVED:
+        return False, "Complaint must be resolved before verification"
+
+    complaint.status = ComplaintStatus.CITIZEN_VERIFIED
+    complaint.save()
+
+    Feedback.objects.create(
+        complaint=complaint,
+        citizen=complaint.citizen,
+        rating=rating,
+        comments=comments
+    )
+    
+    # After verification, the system officially CLOSES it.
+    complaint.status = ComplaintStatus.CLOSED
+    complaint.save()
+
+    return True, "Complaint verified and closed"
+
+def reopen_complaint(complaint_id, citizen_id, reason):
+    """
+    Called by Citizen to reject the resolution and reopen the workflow.
+    """
+    try:
+        complaint = Complaint.objects.get(id=complaint_id, citizen_id=citizen_id)
+    except Complaint.DoesNotExist:
+        return False, "Complaint not found or unauthorized"
+
+    complaint.status = ComplaintStatus.REOPENED
+    complaint.save()
+
+    # Notify Staff/Department
+    assignment = getattr(complaint, 'complaintassignment_set', None)
+    if assignment and assignment.exists():
+        last_assignment = assignment.last()
+        if last_assignment.staff:
+            send_notification(
+                last_assignment.staff.user.id,
+                "Complaint Reopened",
+                f"Complaint {complaint.id} was reopened by the citizen. Reason: {reason}",
+                reference_id=str(complaint.id)
+            )
+
+    return True, "Complaint reopened"

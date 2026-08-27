@@ -137,9 +137,36 @@ class ComplaintDetailScreen extends StatelessWidget {
   }
 
   Widget _buildResolutionSection(BuildContext context) {
+    // Simulating a RESOLVED complaint to demonstrate Phase 15 features
+    bool isResolved = true;
+
+    if (!isResolved) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Text('Awaiting Resolution', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text('Once resolved, you will be able to verify the fix and leave feedback here.'),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Colors.green, width: 2)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -147,24 +174,115 @@ class ComplaintDetailScreen extends StatelessWidget {
           children: [
             const Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.orange),
+                Icon(Icons.check_circle, color: Colors.green),
                 SizedBox(width: 8),
-                Text('Awaiting Resolution', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Complaint Resolved', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green)),
               ],
             ),
             const SizedBox(height: 8),
-            const Text('Once resolved, you will be able to verify the fix and leave feedback here.'),
+            const Text('Staff marked this issue as resolved. Please verify the fix.'),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null, // Disabled until resolved
-                child: const Text('Verify Resolution'),
-              ),
-            ),
+            const Text('Resolution Summary:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Pothole was filled and area was repaved. See attached photo for evidence.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    onPressed: () => _showVerificationDialog(context),
+                    child: const Text('Verify & Close'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                    onPressed: () => _showReopenDialog(context),
+                    child: const Text('Reopen Issue'),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),
+    );
+  }
+
+  void _showVerificationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Verify Resolution'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Are you satisfied with the resolution? Please rate your experience.'),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) => const Icon(Icons.star_border, size: 32, color: Colors.amber)),
+              ),
+              const SizedBox(height: 16),
+              const TextField(
+                decoration: InputDecoration(
+                  hintText: 'Leave a comment (optional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Complaint verified and closed!')));
+              },
+              child: const Text('Submit Feedback'),
+            )
+          ],
+        );
+      }
+    );
+  }
+
+  void _showReopenDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reopen Complaint'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('If the issue was not resolved properly, you can reopen it. Please provide a reason.'),
+              const SizedBox(height: 16),
+              const TextField(
+                decoration: InputDecoration(
+                  hintText: 'Reason for reopening...',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Complaint has been reopened.')));
+              },
+              child: const Text('Reopen'),
+            )
+          ],
+        );
+      }
     );
   }
 }
