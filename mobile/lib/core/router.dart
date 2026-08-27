@@ -7,6 +7,7 @@ import '../ui/screens/login_screen.dart';
 import '../ui/screens/home_screen.dart';
 import '../ui/screens/report_problem_screen.dart';
 import '../ui/screens/complaint_detail_screen.dart';
+import '../ui/screens/admin_dashboard_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -38,6 +39,11 @@ final GoRouter appRouter = GoRouter(
         final id = state.pathParameters['id']!;
         return ComplaintDetailScreen(complaintId: id);
       },
+    ),
+    GoRoute(
+      path: '/admin',
+      name: 'admin',
+      builder: (context, state) => const AdminDashboardScreen(),
     ),
   ],
 );
