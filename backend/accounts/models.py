@@ -86,3 +86,16 @@ class Notification(AbstractBaseModel):
     
     def __str__(self):
         return f"Notification to {self.user.email}: {self.title}"
+
+class AuditLog(AbstractBaseModel):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='audit_logs')
+    action = models.CharField(max_length=255)
+    entity_type = models.CharField(max_length=100) # e.g. "Complaint", "User", "Department"
+    entity_id = models.CharField(max_length=100)
+    old_value = models.TextField(blank=True)
+    new_value = models.TextField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return f"[{self.created_at}] {self.user.email if self.user else 'SYSTEM'} {self.action} on {self.entity_type} {self.entity_id}"
+
