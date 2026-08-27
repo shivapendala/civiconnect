@@ -1,0 +1,21 @@
+{
+  "name": "civicconnect-monorepo",
+  "version": "2.4.0",
+  "private": true,
+  "description": "CivicConnect Enterprise Smart City & Grievance Management Monorepo",
+  "scripts": {
+    "start": "python main.py all",
+    "build": "npm run build --prefix web",
+    "test": "pytest backend/accounts/tests backend/complaints/tests",
+    "lint": "eslint web/src --ext .ts,.tsx",
+    "dev:backend": "python backend/manage.py runserver",
+    "dev:ai": "uvicorn ai-service.main:app --reload --port 8001",
+    "dev:web": "npm run dev --prefix web"
+  },
+  "workspaces": [
+    "web"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
