@@ -41,6 +41,7 @@ dependencies:
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   fl_chart: ^1.2.0
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   flutter_test:
