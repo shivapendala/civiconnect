@@ -1,82 +1,38 @@
+import logging
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
-import logging
-
-from .models import Complaint, ComplaintStatus, ComplaintPriority
-from accounts.models import User, StaffProfile, Role
-from accounts.notifications import send_notification
+from .models import Complaint
+from .services import ComplaintService
 
 logger = logging.getLogger(__name__)
 
-@shared_task
-def check_sla_violations():
-    """
-    Background job to monitor complaint ages against their Priority SLA limits.
-    High/Critical: 24h, Medium: 72h, Low: 168h
-    If violated:
-    - Escalate status.
-    - Notify Department Manager and System Admins.
-    """
-    logger.info("Starting SLA violation check...")
+@shared_task(name="complaints.auto_triage_pending_complaints")
+def auto_triage_pending_complaints():
+    """Scans submitted complaints and runs automated AI categorization and duplicate detection."""
+    pending = Complaint.objects.filter(status="submitted").select_related("category", "tenant")
+    triaged_count = 0
     
-    # Active states
-    active_statuses = [
-        ComplaintStatus.SUBMITTED,
-        ComplaintStatus.ACKNOWLEDGED,
-        ComplaintStatus.ASSIGNED,
-        ComplaintStatus.IN_PROGRESS,
-        ComplaintStatus.ON_HOLD
-    ]
-    
-    active_complaints = Complaint.objects.filter(status__in=active_statuses)
-    now = timezone.now()
-    escalated_count = 0
-
-    # Get admin users for escalation notices
-    admins = User.objects.filter(is_superuser=True) # Assuming superusers are Admins
-
-    for complaint in active_complaints:
-        age_hours = (now - complaint.created_at).total_seconds() / 3600
-        
-        sla_limit = None
-        if complaint.priority in [ComplaintPriority.CRITICAL, ComplaintPriority.HIGH]:
-            sla_limit = 24
-        elif complaint.priority == ComplaintPriority.MEDIUM:
-            sla_limit = 72
-        elif complaint.priority == ComplaintPriority.LOW:
-            sla_limit = 168
+    for c in pending:
+        try:
+            from ai_routing.client import AIRoutingClient
+            triage_res = AIRoutingClient.triage_description(c.description)
+            if triage_res.get("suggested_priority"):
+                c.priority = triage_res["suggested_priority"]
+                c.ai_confidence_score = float(triage_res.get("confidence", 0.85))
+                c.ai_predicted_category = triage_res.get("suggested_category", "")
+                c.status = "triaged"
+                c.save()
+                triaged_count += 1
+        except Exception as e:
+            logger.error(f"Auto triage failed for {c.tracking_number}: {e}")
             
-        if sla_limit and age_hours > sla_limit:
-            # Escalation triggered
-            complaint.status = ComplaintStatus.ESCALATED
-            complaint.save()
-            escalated_count += 1
-            
-            msg_title = "Complaint SLA Exceeded & Escalated"
-            msg_body = f"Complaint {complaint.id} ({complaint.title}) has exceeded its {sla_limit}h SLA. Action required immediately."
-            
-            # Notify Department Manager
-            if complaint.category and complaint.category.department:
-                manager = complaint.category.department.manager
-                if manager and manager.user:
-                    send_notification(manager.user.id, msg_title, msg_body, reference_id=str(complaint.id))
-            
-            # Notify System Admins
-            for admin in admins:
-                send_notification(admin.id, msg_title, msg_body, reference_id=str(complaint.id))
+    logger.info(f"Auto-triaged {triaged_count} complaints.")
+    return triaged_count
 
-    logger.info(f"SLA check completed. {escalated_count} complaints escalated.")
-    return f"Escalated {escalated_count} complaints"
-
-@shared_task
-def run_vision_analysis_task(complaint_id):
-    from .ai_services import analyze_complaint_image
-    success = analyze_complaint_image(complaint_id)
-    return success
-
-@shared_task
-def run_rag_analysis_task(complaint_id):
-    from .ai_services import find_similar_complaints_rag
-    success = find_similar_complaints_rag(complaint_id)
-    return success
+@shared_task(name="complaints.scan_sla_breaches")
+def scan_sla_breaches():
+    """Background task evaluating impending and breached SLAs."""
+    from sla_engine.calculator import SLACalculator
+    results = SLACalculator.evaluate_breaches()
+    logger.info(f"SLA breach scan completed: {results}")
+    return results
