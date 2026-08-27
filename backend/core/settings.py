@@ -199,3 +199,9 @@ CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'memory://')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'cache+memory://')
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'accounts.auth_backend.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
