@@ -42,6 +42,15 @@ class Complaint(AbstractBaseModel):
     def __str__(self):
         return self.title
 
+class ChatMessage(AbstractBaseModel):
+    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Msg on {self.complaint.id} by {self.sender.email}"
+
 class ComplaintLocation(AbstractBaseModel):
     complaint = models.OneToOneField(Complaint, on_delete=models.CASCADE, related_name='location')
     latitude = models.DecimalField(max_digits=9, decimal_places=6)

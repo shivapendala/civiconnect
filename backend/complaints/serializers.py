@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Complaint, ComplaintCategory, ComplaintAttachment, ComplaintAssignment, Resolution, ResolutionEvidence, Feedback
+from .models import Complaint, ComplaintCategory, ComplaintAttachment, ComplaintAssignment, Resolution, ResolutionEvidence, Feedback, ChatMessage
 from .validators import validate_file_size, validate_mime_type
 
 class ComplaintCategorySerializer(serializers.ModelSerializer):
@@ -50,4 +50,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = '__all__'
-        read_only_fields = ['complaint', 'citizen']
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    sender_email = serializers.ReadOnlyField(source='sender.email')
+    
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'complaint', 'sender', 'sender_email', 'content', 'is_read', 'created_at']
+        read_only_fields = ['complaint']

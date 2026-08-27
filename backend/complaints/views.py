@@ -99,6 +99,16 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             return Response({"status": msg})
         return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
+    @decorators.action(detail=True, methods=['get'])
+    def chat_history(self, request, pk=None):
+        """Fetch chat history for a complaint"""
+        complaint = self.get_object()
+        from .models import ChatMessage
+        from .serializers import ChatMessageSerializer
+        messages = ChatMessage.objects.filter(complaint=complaint).order_by('created_at')
+        serializer = ChatMessageSerializer(messages, many=True)
+        return Response(serializer.data)
+
 
 class AnalyticsViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
