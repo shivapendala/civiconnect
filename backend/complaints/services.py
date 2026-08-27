@@ -46,10 +46,16 @@ def assign_complaint(complaint_id):
 
     # Query staff in this department, annotate with their current active workload
     # We count assignments where the related complaint is in an active status.
-    staff_members = StaffProfile.objects.filter(
+    staff_query = StaffProfile.objects.filter(
         department=department,
         user__is_active=True
-    ).annotate(
+    )
+    
+    # Isolate by municipality if complaint belongs to one
+    if complaint.municipality:
+        staff_query = staff_query.filter(municipality=complaint.municipality)
+        
+    staff_members = staff_query.annotate(
         active_workload=Count(
             'complaintassignment', 
             filter=Q(complaintassignment__complaint__status__in=active_statuses)

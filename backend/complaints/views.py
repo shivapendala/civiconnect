@@ -17,13 +17,17 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if hasattr(user, 'citizen_profile'):
             return Complaint.objects.filter(citizen=user.citizen_profile)
+        elif hasattr(user, 'staff_profile'):
+            if user.staff_profile.municipality:
+                return Complaint.objects.filter(municipality=user.staff_profile.municipality)
+        # If superuser or no specific municipality, return all
         return Complaint.objects.all()
 
     def perform_create(self, serializer):
         user = self.request.user
         # Must be a citizen to create a complaint directly through this endpoint
         if hasattr(user, 'citizen_profile'):
-            complaint = serializer.save(citizen=user.citizen_profile)
+            complaint = serializer.save(citizen=user.citizen_profile, municipality=user.citizen_profile.municipality)
             log_audit_action(user.id, "Created Complaint", "Complaint", complaint.id, new_value=complaint.title, ip_address=self.request.META.get('REMOTE_ADDR'))
             # Auto-assign
             assign_complaint(complaint.id)

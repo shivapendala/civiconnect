@@ -31,6 +31,7 @@ class ComplaintStatus(models.TextChoices):
 
 class Complaint(AbstractBaseModel):
     citizen = models.ForeignKey(CitizenProfile, on_delete=models.CASCADE, related_name='complaints')
+    municipality = models.ForeignKey('accounts.Municipality', on_delete=models.CASCADE, related_name='complaints', null=True)
     category = models.ForeignKey(ComplaintCategory, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
