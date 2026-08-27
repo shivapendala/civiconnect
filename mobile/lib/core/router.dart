@@ -14,6 +14,7 @@ import '../ui/screens/citizen_map_screen.dart';
 import '../ui/screens/admin_map_screen.dart';
 import '../ui/screens/notifications_screen.dart';
 import '../ui/screens/notification_preferences_screen.dart';
+import '../ui/screens/admin_analytics_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -80,6 +81,11 @@ final GoRouter appRouter = GoRouter(
       path: '/notifications/preferences',
       name: 'notification_preferences',
       builder: (context, state) => const NotificationPreferencesScreen(),
+    ),
+    GoRoute(
+      path: '/admin/analytics',
+      name: 'admin_analytics',
+      builder: (context, state) => const AdminAnalyticsScreen(),
     ),
   ],
 );
