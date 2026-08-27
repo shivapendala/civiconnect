@@ -9,6 +9,7 @@ import '../ui/screens/report_problem_screen.dart';
 import '../ui/screens/complaint_detail_screen.dart';
 import '../ui/screens/admin_dashboard_screen.dart';
 import '../ui/screens/department_management_screen.dart';
+import '../ui/screens/staff_management_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -50,6 +51,11 @@ final GoRouter appRouter = GoRouter(
       path: '/admin/departments',
       name: 'departments',
       builder: (context, state) => const DepartmentManagementScreen(),
+    ),
+    GoRoute(
+      path: '/admin/staff',
+      name: 'staff',
+      builder: (context, state) => const StaffManagementScreen(),
     ),
   ],
 );

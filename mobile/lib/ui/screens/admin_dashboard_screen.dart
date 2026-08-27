@@ -21,6 +21,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         actions: [
+          IconButton(icon: const Icon(Icons.people), onPressed: () => context.push('/admin/staff')),
           IconButton(icon: const Icon(Icons.business), onPressed: () => context.push('/admin/departments')),
           IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
         ],
