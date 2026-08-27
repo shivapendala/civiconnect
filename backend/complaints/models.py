@@ -79,3 +79,14 @@ class Feedback(AbstractBaseModel):
     citizen = models.ForeignKey(CitizenProfile, on_delete=models.CASCADE)
     rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     comments = models.TextField(blank=True)
+
+class SLARule(AbstractBaseModel):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='sla_rules')
+    priority = models.CharField(max_length=20, choices=ComplaintPriority.choices)
+    resolution_time_hours = models.IntegerField(help_text="Expected resolution time in hours")
+
+class PerformanceMetrics(AbstractBaseModel):
+    department = models.OneToOneField(Department, on_delete=models.CASCADE, related_name='performance_metrics')
+    total_complaints_handled = models.IntegerField(default=0)
+    average_resolution_time_hours = models.FloatField(default=0.0)
+    sla_compliance_rate = models.FloatField(default=0.0)
