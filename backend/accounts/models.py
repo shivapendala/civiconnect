@@ -66,3 +66,23 @@ class Device(AbstractBaseModel):
     
     def __str__(self):
         return f"Device for {self.user.email}"
+
+class NotificationPreference(AbstractBaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preferences')
+    push_enabled = models.BooleanField(default=True)
+    email_enabled = models.BooleanField(default=True)
+    sms_enabled = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Preferences for {self.user.email}"
+
+class Notification(AbstractBaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    # Generic relation to complaint or other entity without hard dependency
+    reference_id = models.CharField(max_length=100, blank=True) 
+    
+    def __str__(self):
+        return f"Notification to {self.user.email}: {self.title}"
